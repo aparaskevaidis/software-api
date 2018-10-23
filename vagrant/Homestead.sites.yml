@@ -1,0 +1,10 @@
+- map: www.software.api.local.com
+  to: /home/projects/software-api/
+  public_folder: public
+  php_version: "7.1"
+  params:
+    - key: APP_ENV
+      value: local
+
+  databases:
+    - software-api
