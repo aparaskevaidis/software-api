@@ -23,6 +23,27 @@ class SoftwareController extends Controller
     }
 
     public function checkForSoftwareUpdates(Request $request) {
+        $license = $request->get('licence');
+        $software = $request->get('software');
+        $version = $request->get('version');
+
+        if (empty($license) || empty($software)) {
+            $responseData = [
+                'code' => '0',
+                'valid' => false,
+                'msg' => 'No License Found'
+            ];
+
+            return Response::json($responseData);
+        }
+
+        $updateService = new UpdateService();
+
+        $license = $updateService->checkLicence($license, $software);
+
+        if ($license) {
+            $check = $updateService->checkForUpdates( $software, $version);
+        }
 
     }
 

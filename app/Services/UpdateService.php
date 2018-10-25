@@ -84,7 +84,7 @@ class UpdateService
      * @param $version
      * @return array
      */
-    protected function checkForUpdates($software, $version)
+    public function checkForUpdates($software, $version)
     {
         $updates = false;
         $dataSoftware = CompanySoftware::all()->where('id', $software);
