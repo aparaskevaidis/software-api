@@ -30,9 +30,9 @@ class UpdateService
         $validation = $this->checkLicence($licence, $software);
         $checkUpdates = $this->checkForUpdates($software, $version);
 
-        if ($validation && $checkUpdates) {
-            $dirName = public_path() . '/uploads/packs/1.1';
-            $tempPath = public_path() . '/temp';
+        if ($validation && $checkUpdates['updates']) {
+            $dirName = public_path() . '/uploads/packs/'. $checkUpdates['version'];
+            $tempPath = public_path() . '/temp/';
             // Choose a name for the archive.
             $zipFileName = 'myzip.zip';
 
@@ -43,7 +43,7 @@ class UpdateService
             // Create "MyCoolName.zip" file in public directory of project.
             $zip = new ZipArchive;
 
-            if ( $zip->open( public_path() . '/' . $zipFileName, ZipArchive::CREATE ) === true ) {
+            if ( $zip->open( $tempPath . $zipFileName, ZipArchive::CREATE ) === true ) {
                 // Copy all the files from the folder and place them in the archive.
                 foreach (glob($dirName . '/*') as $fileName) {
                     $file = basename($fileName);
@@ -82,7 +82,7 @@ class UpdateService
      * Check For Updates
      * @param $software
      * @param $version
-     * @return bool
+     * @return array
      */
     protected function checkForUpdates($software, $version)
     {
@@ -92,7 +92,10 @@ class UpdateService
         $dataSoftwareArray = $dataSoftware->toArray();
 
         if (empty($dataSoftwareArray)) {
-            return false;
+            return [
+                'updates' => false,
+                'version' => ''
+            ];
         }
 
         $newVersion = $dataSoftware->get(0)->version;
@@ -101,7 +104,10 @@ class UpdateService
             $updates = true;
         }
 
-        return $updates;
+        return [
+            'updates' => $updates,
+            'version' => $newVersion
+        ];
     }
 
     /**
