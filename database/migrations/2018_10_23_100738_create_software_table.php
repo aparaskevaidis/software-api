@@ -19,7 +19,7 @@ class CreateSoftwareTable extends Migration
             $table->unsignedInteger('software_id');
             $table->string('licence');
             $table->string('expired');
-            $table->text('version');
+            $table->double('version');
             $table->timestamps();
         });
     }

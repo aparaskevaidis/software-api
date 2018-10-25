@@ -37,4 +37,9 @@ class User extends Authenticatable
     {
         return [];
     }
+
+    public function software()
+    {
+        return $this->hasMany(Software::class);
+    }
 }
