@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Response;
 class SoftwareController extends Controller
 {
 
-    public function index(Request $request) {
+    public function updateSoftware(Request $request) {
+
 //        $license = $request->get('licence');
 //        $software = $request->get('software');
 //
@@ -21,6 +22,14 @@ class SoftwareController extends Controller
 //        return response()->json(null, 204);
     }
 
+    public function checkForSoftwareUpdates(Request $request) {
+
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function validateLicence(Request $request) {
         $license = $request->get('licence');
         $software = $request->get('software');

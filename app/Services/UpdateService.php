@@ -11,23 +11,57 @@ namespace App\Services;
 
 use App\CompanySoftware;
 use App\Licences;
-use App\Software;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Symfony\Component\HttpFoundation\Request;
+use ZipArchive;
 
 class UpdateService
 {
+    /**
+     * Download Update
+     * @param $licence
+     * @param $software
+     * @param $version
+     * @return array
+     */
     public function updateSoftware($licence, $software, $version)
     {
-
+        $dataArray = [];
         $validation = $this->checkLicence($licence, $software);
+        $checkUpdates = $this->checkForUpdates($software, $version);
 
-        if ($validation) {
-            $dataSoftware = CompanySoftware::with('licences')->where('id', $software)->get();
+        if ($validation && $checkUpdates) {
+            $dirName = public_path() . '/uploads/packs/1.1';
+            $tempPath = public_path() . '/temp';
+            // Choose a name for the archive.
+            $zipFileName = 'myzip.zip';
 
+            $headers = array(
+                'Content-Type' => 'application/octet-stream',
+            );
 
+            // Create "MyCoolName.zip" file in public directory of project.
+            $zip = new ZipArchive;
+
+            if ( $zip->open( public_path() . '/' . $zipFileName, ZipArchive::CREATE ) === true ) {
+                // Copy all the files from the folder and place them in the archive.
+                foreach (glob($dirName . '/*') as $fileName) {
+                    $file = basename($fileName);
+                    $zip->addFile($fileName, $file);
+                }
+
+                $zip->close();
+
+            }
+
+            $dataArray = [
+                'headers' => $headers,
+                'name' => $zipFileName,
+                'path' => $tempPath
+            ];
         }
+
+        return $dataArray;
     }
 
     /**
@@ -48,17 +82,34 @@ class UpdateService
      * Check For Updates
      * @param $software
      * @param $version
+     * @return bool
      */
     protected function checkForUpdates($software, $version)
     {
+        $updates = false;
         $dataSoftware = CompanySoftware::all()->where('id', $software);
+
+        $dataSoftwareArray = $dataSoftware->toArray();
+
+        if (empty($dataSoftwareArray)) {
+            return false;
+        }
 
         $newVersion = $dataSoftware->get(0)->version;
 
+        if ($newVersion > $version) {
+            $updates = true;
+        }
 
-        dd($newVersion);
+        return $updates;
     }
 
+    /**
+     * Validate Licence
+     * @param Collection $licences
+     * @param $licence
+     * @return bool
+     */
     private function licenceValidation(Collection $licences, $licence)
     {
         $licenced = false;
