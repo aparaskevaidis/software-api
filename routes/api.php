@@ -21,4 +21,4 @@ Route::post('register', 'AuthController@register');
 Route::post('login', 'AuthController@login');
 Route::post('me', 'AuthController@me');
 
-Route::post('software', 'SoftwareController@index');
+Route::post('software', 'SoftwareController@validateLicence');
