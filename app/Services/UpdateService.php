@@ -15,9 +15,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\File;
 use ZanySoft\Zip\Zip;
-use ZanySoft\Zip\ZipManager;
-use ZipArchive;
-
 
 class UpdateService
 {
@@ -27,6 +24,7 @@ class UpdateService
      * @param $software
      * @param $version
      * @return array
+     * @throws \Exception
      */
     public function updateSoftware($licence, $software, $version)
     {
@@ -38,7 +36,7 @@ class UpdateService
             $dirName = public_path() . '/uploads/' . $checkUpdates['version'];
             $tempPath = public_path() . '/temp/';
             // Choose a name for the archive.
-            $zipFileName = 'myzip.zip';
+            $zipFileName = $checkUpdates['title'].'_'.$checkUpdates['version'].'.zip';
             File::delete($tempPath.'/'.$zipFileName);
             $zip = Zip::create($tempPath . $zipFileName);
 
@@ -48,8 +46,7 @@ class UpdateService
             $headers = array(
                 'Content-Type' => 'application/octet-stream',
                 'Content-Transfer-Encoding'=> 'Binary',
-//                'Content-Disposition' => 'attachment; filename='.$tempPath.'/'.$zipFileName,
-                'Content-Length' => filesize($tempPath.'/'.$zipFileName)
+                'Content-Length' => filesize($tempPath.$zipFileName)
             );
 
             $dataArray = [
@@ -92,19 +89,21 @@ class UpdateService
         if (empty($dataSoftwareArray)) {
             return [
                 'updates' => false,
-                'version' => ''
+                'version' => '',
+                'title' => ''
             ];
         }
 
         $newVersion = $dataSoftware->get(0)->version;
-
+        $title = $dataSoftware->get(0)->title;
         if ($newVersion > $version) {
             $updates = true;
         }
 
         return [
             'updates' => $updates,
-            'version' => $newVersion
+            'version' => $newVersion,
+            'title' => $title
         ];
     }
 
@@ -149,38 +148,6 @@ class UpdateService
     {
 
 
-        if (file_exists($destination) && !$overwrite) {
-            return false;
-        }
-
-
-        $validFiles = [];
-        if (is_array($files)) {
-            foreach ($files as $file) {
-                if (file_exists($file)) {
-                    $validFiles[] = $file;
-                }
-            }
-        }
-
-
-        if (count($validFiles)) {
-            $zip = new ZipArchive();
-            if ($zip->open($destination, $overwrite ? ZipArchive::OVERWRITE : ZipArchive::CREATE) !== true) {
-                return false;
-            }
-
-
-            foreach ($validFiles as $file) {
-                $zip->addFile($file, $file);
-            }
-
-
-            $zip->close();
-            return file_exists($destination);
-        } else {
-            return false;
-        }
     }
 
 }
