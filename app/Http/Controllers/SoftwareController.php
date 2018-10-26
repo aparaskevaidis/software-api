@@ -34,8 +34,18 @@ class SoftwareController extends Controller
         $updateService = new UpdateService();
 
         $responseData = $updateService->updateSoftware($license, $software, $version);
+
+        if (empty($responseData)) {
+
+            $responseData = [
+                'code' => '0',
+                'msg' => 'An Error Occured While Downloading'
+            ];
+
+            return Response::json($responseData);
+        }
         ob_clean();
-        //dd(Response::download($responseData['path'], null, $responseData['headers']));
+
         return Response::download($responseData['path'], $responseData['name'], $responseData['headers'], 'attachment');
     }
 
