@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\CompanySoftware;
 use App\Services\UpdateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -13,8 +12,10 @@ class SoftwareController extends Controller
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @throws \Exception
      */
-    public function updateSoftware(Request $request) {
+    public function updateSoftware(Request $request)
+    {
 
         $license = $request->get('licence');
         $software = $request->get('software');
@@ -35,14 +36,15 @@ class SoftwareController extends Controller
         $responseData = $updateService->updateSoftware($license, $software, $version);
         ob_clean();
         //dd(Response::download($responseData['path'], null, $responseData['headers']));
-        return Response::download($responseData['path'], $responseData['name'], $responseData['headers'],'attachment');
+        return Response::download($responseData['path'], $responseData['name'], $responseData['headers'], 'attachment');
     }
 
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function checkForSoftwareUpdates(Request $request) {
+    public function checkForSoftwareUpdates(Request $request)
+    {
 
         $license = $request->get('licence');
         $software = $request->get('software');
@@ -63,21 +65,21 @@ class SoftwareController extends Controller
         $license = $updateService->checkLicence($license, $software);
 
         if ($license) {
-            $check = $updateService->checkForUpdates( $software, $version);
+            $check = $updateService->checkForUpdates($software, $version);
 
             if ($check['updates']) {
 
                 $responseData = [
                     'code' => '1',
                     'updates' => true,
-                    'url' => route('software/download', ['licence'=>$license, 'software'=>$software, 'version'=>$version]),
+                    'url' => route('software/download', ['licence' => $license, 'software' => $software, 'version' => $version]),
                     'msg' => 'Updates Available'
                 ];
             } else {
                 $responseData = [
                     'code' => '2',
                     'updates' => false,
-                    'url' =>'',
+                    'url' => '',
                     'msg' => 'No Updates Available'
                 ];
             }
@@ -97,7 +99,8 @@ class SoftwareController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function validateLicence(Request $request) {
+    public function validateLicence(Request $request)
+    {
         $license = $request->get('licence');
         $software = $request->get('software');
 
@@ -116,11 +119,11 @@ class SoftwareController extends Controller
         $check = $updateService->checkLicence($license, $software);
 
 
-        if($check) {
+        if ($check) {
             $responseData = [
-              'code' => '1',
-              'valid' => true,
-              'msg' => 'Software is Licenced'
+                'code' => '1',
+                'valid' => true,
+                'msg' => 'Software is Licenced'
             ];
         } else {
             $responseData = [
