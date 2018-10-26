@@ -13,7 +13,11 @@ use App\CompanySoftware;
 use App\Licences;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\File;
+use ZanySoft\Zip\Zip;
+use ZanySoft\Zip\ZipManager;
 use ZipArchive;
+
 
 class UpdateService
 {
@@ -31,33 +35,27 @@ class UpdateService
         $checkUpdates = $this->checkForUpdates($software, $version);
 
         if ($validation && $checkUpdates['updates']) {
-            $dirName = public_path() . '/uploads/packs/'. $checkUpdates['version'];
+            $dirName = public_path() . '/uploads/' . $checkUpdates['version'];
             $tempPath = public_path() . '/temp/';
             // Choose a name for the archive.
             $zipFileName = 'myzip.zip';
+            File::delete($tempPath.'/'.$zipFileName);
+            $zip = Zip::create($tempPath . $zipFileName);
+
+            $zip->add($dirName);
+            $zip->close();
 
             $headers = array(
                 'Content-Type' => 'application/octet-stream',
+                'Content-Transfer-Encoding'=> 'Binary',
+//                'Content-Disposition' => 'attachment; filename='.$tempPath.'/'.$zipFileName,
+                'Content-Length' => filesize($tempPath.'/'.$zipFileName)
             );
-
-            // Create "MyCoolName.zip" file in public directory of project.
-            $zip = new ZipArchive;
-
-            if ( $zip->open( $tempPath . $zipFileName, ZipArchive::CREATE ) === true ) {
-                // Copy all the files from the folder and place them in the archive.
-                foreach (glob($dirName . '/*') as $fileName) {
-                    $file = basename($fileName);
-                    $zip->addFile($fileName, $file);
-                }
-
-                $zip->close();
-
-            }
 
             $dataArray = [
                 'headers' => $headers,
                 'name' => $zipFileName,
-                'path' => $tempPath
+                'path' => $tempPath . $zipFileName
             ];
         }
 
@@ -146,4 +144,43 @@ class UpdateService
 
         return $valid;
     }
+
+    private function createZip($files = array(), $destination = '', $overwrite = false)
+    {
+
+
+        if (file_exists($destination) && !$overwrite) {
+            return false;
+        }
+
+
+        $validFiles = [];
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                if (file_exists($file)) {
+                    $validFiles[] = $file;
+                }
+            }
+        }
+
+
+        if (count($validFiles)) {
+            $zip = new ZipArchive();
+            if ($zip->open($destination, $overwrite ? ZipArchive::OVERWRITE : ZipArchive::CREATE) !== true) {
+                return false;
+            }
+
+
+            foreach ($validFiles as $file) {
+                $zip->addFile($file, $file);
+            }
+
+
+            $zip->close();
+            return file_exists($destination);
+        } else {
+            return false;
+        }
+    }
+
 }
