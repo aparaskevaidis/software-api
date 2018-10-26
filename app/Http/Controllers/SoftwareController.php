@@ -72,9 +72,9 @@ class SoftwareController extends Controller
 
         $updateService = new UpdateService();
 
-        $license = $updateService->checkLicence($license, $software);
+        $validation = $updateService->checkLicence($license, $software);
 
-        if ($license) {
+        if ($validation) {
             $check = $updateService->checkForUpdates($software, $version);
 
             if ($check['updates']) {
@@ -82,7 +82,7 @@ class SoftwareController extends Controller
                 $responseData = [
                     'code' => '1',
                     'updates' => true,
-                    'url' => route('software/download', ['licence' => $license, 'software' => $software, 'version' => $version]),
+                    'url' => route('software_download', ['licence' => $license, 'software' => $software, 'version' => $version]),
                     'msg' => 'Updates Available'
                 ];
             } else {
