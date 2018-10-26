@@ -36,8 +36,8 @@ class UpdateService
             $dirName = public_path() . '/uploads/' . $checkUpdates['version'];
             $tempPath = public_path() . '/temp/';
             // Choose a name for the archive.
-            $zipFileName = $checkUpdates['title'].'_'.$checkUpdates['version'].'.zip';
-            File::delete($tempPath.'/'.$zipFileName);
+            $zipFileName = $checkUpdates['title'] . '_' . $checkUpdates['version'] . '.zip';
+            File::delete($tempPath . '/' . $zipFileName);
             $zip = Zip::create($tempPath . $zipFileName);
 
             $zip->add($dirName);
@@ -45,8 +45,8 @@ class UpdateService
 
             $headers = array(
                 'Content-Type' => 'application/octet-stream',
-                'Content-Transfer-Encoding'=> 'Binary',
-                'Content-Length' => filesize($tempPath.$zipFileName)
+                'Content-Transfer-Encoding' => 'Binary',
+                'Content-Length' => filesize($tempPath . $zipFileName)
             );
 
             $dataArray = [
