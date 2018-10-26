@@ -144,10 +144,4 @@ class UpdateService
         return $valid;
     }
 
-    private function createZip($files = array(), $destination = '', $overwrite = false)
-    {
-
-
-    }
-
 }
